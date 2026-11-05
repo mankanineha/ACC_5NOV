@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: shuttle-postgres
+    environment:
+      POSTGRES_USER: shuttle_user
+      POSTGRES_PASSWORD: shuttle_pass
+      POSTGRES_DB: shuttle_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: shuttle-redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shuttle-backend
+    networks:
+      default:
+        aliases:
+          - backend-service
+    environment:
+      DATABASE_URL: postgresql://shuttle_user:shuttle_pass@postgres:5432/shuttle_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POD_NAME: docker-compose-pod-1
+      POD_IP: 172.20.0.4
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shuttle-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

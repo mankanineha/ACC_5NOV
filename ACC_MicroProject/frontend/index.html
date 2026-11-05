@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Hopper 🚌 | Smart Shuttle Booking System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Top College Navigation Banner -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="bus-badge-icon">
+        <span class="icon-emoji">🚌</span>
+      </div>
+      <div>
+        <div class="brand-title">CAMPUS HOPPER <span class="badge-live">LIVE</span></div>
+        <div class="brand-sub">University Shuttle Service • High-Concurrency Transit</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <!-- Live Pod Tracker -->
+      <div class="pod-chip" title="Kubernetes backend pod currently serving this session">
+        <span class="ping-circle"></span>
+        <span class="pod-chip-label">K8s Pod:</span>
+        <strong id="current-pod-name" class="pod-chip-val">Connecting...</strong>
+      </div>
+
+      <!-- Quick Reset Button for Professor Demo -->
+      <button id="btn-reset-demo" class="btn-reset" title="Reset all seats and locks to clean state">
+        🔄 Reset Demo
+      </button>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Active Route Banner with Fun Animated Path -->
+    <section class="route-hero">
+      <div class="route-tracker">
+        <div class="stop-point start">
+          <div class="stop-dot"></div>
+          <div class="stop-info">
+            <span class="stop-tag">ORIGIN</span>
+            <strong id="route-origin">Hostel Complex (Block 1-5)</strong>
+            <span class="stop-time">Depart: 08:30 AM</span>
+          </div>
+        </div>
+
+        <div class="road-path">
+          <div class="road-dashes"></div>
+          <div class="mini-bus-runner">🚌💨</div>
+        </div>
+
+        <div class="stop-point end">
+          <div class="stop-dot finish"></div>
+          <div class="stop-info">
+            <span class="stop-tag">DESTINATION</span>
+            <strong id="route-destination">Main Academic Complex</strong>
+            <span class="stop-time">ETA: 08:45 AM (15m ride)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="route-stats-pill">
+        <div class="stat-cell">
+          <span class="label">VEHICLE</span>
+          <strong id="active-vehicle-no">EXPRESS-01</strong>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-cell">
+          <span class="label">CAPACITY</span>
+          <span>24 Seats</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-cell">
+          <span class="label">REMAINING</span>
+          <strong id="active-available" class="seats-left-pill">-- Free</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Left Bus Layout, Right Student Pass -->
+    <main class="main-layout">
+      <!-- Interactive Shuttle Bus Interior -->
+      <section class="bus-stage-card">
+        <div class="card-head">
+          <div>
+            <h2>Select Your Seat</h2>
+            <p>Pick a seat to lock it for 30s before someone else snatches it!</p>
+          </div>
+          <!-- Legend -->
+          <div class="legend-bar">
+            <span class="leg-pill free"><span class="dot"></span> Available</span>
+            <span class="leg-pill held"><span class="dot"></span> Locked (30s)</span>
+            <span class="leg-pill booked"><span class="dot"></span> Reserved</span>
+          </div>
+        </div>
+
+        <!-- Physical Bus Schematic -->
+        <div class="bus-wrapper">
+          <!-- Bus Windshield & Front Bumper -->
+          <div class="bus-hood">
+            <div class="headlight left"></div>
+            <div class="windshield-glass">
+              <span class="windshield-wiper left"></span>
+              <span class="windshield-wiper right"></span>
+              <span class="bus-number-sign">SHUTTLE 01 • CAMPUS EXPRESS</span>
+            </div>
+            <div class="headlight right"></div>
+          </div>
+
+          <!-- Driver Cabin -->
+          <div class="driver-bar">
+            <div class="driver-station">
+              <span class="steering">⚙️</span>
+              <span class="driver-name">Driver: Ramesh K.</span>
+              <span class="coffee-cup">☕</span>
+            </div>
+            <div class="bus-door">
+              <span>DOOR ➔</span>
+            </div>
+          </div>
+
+          <!-- Seats Grid -->
+          <div class="seats-floor" id="seat-grid-container">
+            <div class="seat-loading">Loading shuttle seating map...</div>
+          </div>
+
+          <!-- Rear Axle -->
+          <div class="bus-rear-bumper">
+            <span>EMERGENCY EXIT 🚪</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Student Form & Digital Pass -->
+      <aside class="sidebar">
+        <!-- Booking Action Card -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <h3>Student Passenger Info</h3>
+            <span class="rush-badge">⚡ RUSH HOUR READY</span>
+          </div>
+
+          <form id="booking-form">
+            <div class="input-block">
+              <label for="student-id">Student ID / Roll No</label>
+              <div class="input-with-icon">
+                <span class="input-icon">🎓</span>
+                <input type="text" id="student-id" placeholder="e.g. 21BCE1042" required value="21BCE1042">
+              </div>
+            </div>
+
+            <div class="input-block">
+              <label for="student-name">Passenger Name</label>
+              <div class="input-with-icon">
+                <span class="input-icon">👤</span>
+                <input type="text" id="student-name" placeholder="Your Full Name" required value="Aarav Sharma">
+              </div>
+            </div>
+
+            <!-- 30-Second Lock Countdown Widget -->
+            <div class="timer-widget" id="lock-status-box" style="display: none;">
+              <div class="timer-top">
+                <span class="timer-icon">⏳</span>
+                <span>Seat <strong id="locked-seat-display">--</strong> is HELD for you!</span>
+              </div>
+              <div class="timer-countdown-row">
+                <span class="timer-digits"><span id="lock-timer">30</span>s</span>
+                <span class="timer-note">Complete booking before timer expires</span>
+              </div>
+              <div class="timer-track">
+                <div class="timer-fill" id="timer-bar"></div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="btn-group">
+              <button type="button" id="btn-lock-seat" class="btn-hold" disabled>
+                🔒 Hold Selected Seat (30s)
+              </button>
+              <button type="submit" id="btn-confirm-book" class="btn-book" disabled>
+                ✅ Confirm & Get Boarding Pass
+              </button>
+            </div>
+          </form>
+
+          <!-- Notification Toast -->
+          <div id="toast-message" class="toast-card" style="display: none;"></div>
+        </div>
+
+        <!-- Realistic Boarding Pass Ticket Card -->
+        <div class="ticket-wrapper" id="ticket-card" style="display: none;">
+          <div class="ticket-header-strip">
+            <span>CAMPUS EXPRESS BOARDING PASS</span>
+            <span class="confirmed-tag">CONFIRMED</span>
+          </div>
+          <div class="ticket-main">
+            <div class="ticket-col">
+              <span class="t-sub">PASSENGER</span>
+              <strong id="tkt-student-name" class="t-main">--</strong>
+              <span id="tkt-student-id" class="t-id">--</span>
+            </div>
+            <div class="ticket-col seat-badge-col">
+              <span class="t-sub">SEAT</span>
+              <strong id="tkt-seat-no" class="seat-huge">--</strong>
+            </div>
+          </div>
+          <div class="ticket-divider">
+            <span class="notch-left"></span>
+            <span class="dashed-line"></span>
+            <span class="notch-right"></span>
+          </div>
+          <div class="ticket-footer">
+            <div>
+              <span class="t-sub">BOOKING REF</span>
+              <span id="tkt-ref-code" class="ref-mono">TKT-XXXXXX</span>
+            </div>
+            <div class="barcode-fake">|||| | | ||| |||| | ||| |||</div>
+          </div>
+        </div>
+
+        <!-- Live DevOps HUD (Viva & Evaluation Demo) -->
+        <div class="devops-hud">
+          <div class="hud-title">
+            <span>🛡️ CONCURRENCY INTEGRITY HUD</span>
+            <span class="hud-badge">ACTIVE</span>
+          </div>
+          <div class="hud-item">
+            <span>Double-Booking Risk:</span>
+            <strong class="hud-green">0.00% (Redis SETNX Guard)</strong>
+          </div>
+          <div class="hud-item">
+            <span>Conflict Reject Latency:</span>
+            <strong class="hud-accent">&lt; 3ms (In-Memory Fast Gate)</strong>
+          </div>
+          <div class="hud-item">
+            <span>HPA Target:</span>
+            <strong>CPU &gt; 70% (2 ➔ 10 Pods)</strong>
+          </div>
+          <div class="hud-item">
+            <span>Scraped Telemetry:</span>
+            <a href="http://localhost:8000/metrics" target="_blank" class="hud-link">View /metrics ↗</a>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
